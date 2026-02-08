@@ -16,9 +16,9 @@ pipeline {
                     ls -la
                     node -v
                     npm -v
-                    npm ci #to instal server
+                    npm ci #to install server
                     npm run build
-                    ls -las
+                    ls -la
                 '''
             }
 
@@ -84,8 +84,8 @@ pipeline {
             steps {
                 echo 'Hello World'
                 sh '''
-                    npm install netlify-cli -g
-                    netlify --version
+                    npm install netlify-cli 
+                    node_modules/.bin/netlify --version
                 '''
             }
 
