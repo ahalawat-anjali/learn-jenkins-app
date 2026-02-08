@@ -1,0 +1,87 @@
+pipeline {
+    agent any
+    environment {
+        NETLIFY_SITE_ID = '1f29ad6b-bc60-4642-98dc-bbc5fef7c1da' //netlify auto check vaue for var name NETLIFY_SITE_ID
+        NETLIFY_AUTH_TOKEN = credentials('netlify-token') //credential manager access secert from jenkins credentials
+    }
+
+    stages {
+        
+
+        stage('DeployStage') {
+            agent{
+                docker{
+                    image 'node:18-alpine'
+                    reuseNode true
+                }
+            }
+            steps {
+                echo 'Hello World'
+                sh '''
+                    npm install netlify-cli@20.1.1 node-jq 
+                    node_modules/.bin/netlify --version
+                    echo "Deploying to staging Site ID: $NETLIFY_SITE_ID"
+                    node_modules/.bin/netlify status
+                    node_modules/.bin/netlify deploy --dir=build  --json > deploy_output.json #deploy to temp env
+                    node_modules/.bin.node-jq -r '.deploy_url' deploy_output.json
+                '''
+            }
+
+
+        }
+
+        stage('Approval'){
+            steps {
+                timeout(time: 1, unit: 'MINUTES') {
+                    input message: 'Ready For Deploying in Prod?', ok: 'Yes, I am Sure'
+                }
+            }
+        }
+        stage('DeployProd') {
+            agent{
+                docker{
+                    image 'node:18-alpine'
+                    reuseNode true
+                }
+            }
+            steps {
+                echo 'Hello World'
+                sh '''
+                    npm install netlify-cli@20.1.1 
+                    node_modules/.bin/netlify --version
+                    echo "Deploying to production Site ID: $NETLIFY_SITE_ID"
+                    node_modules/.bin/netlify status
+                    node_modules/.bin/netlify deploy --dir=build --prod  #deploy to prod
+                '''
+            }
+
+
+        }
+
+        stage ('Prod E2E'){
+                    
+                    agent{
+                        docker{
+                            image 'mcr.microsoft.com/playwright:v1.39.0-jammy'
+                            reuseNode true
+                        }
+                    }
+                    environment{
+                        CI_ENVIRONMENT_URL = 'https://lighthearted-starlight-f72719.netlify.app'
+                    }
+                    steps{
+                        sh '''
+                        npx playwright test --reporter=html
+                        '''
+                    }
+                    post{
+                        always{
+                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'PlayWright E2E Report', reportTitles: '', useWrapperFileDirectly: true])
+                        }
+                    }
+                }
+        
+        
+    }
+    
+}

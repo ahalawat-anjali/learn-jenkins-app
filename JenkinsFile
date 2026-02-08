@@ -85,24 +85,25 @@ pipeline {
             steps {
                 echo 'Hello World'
                 sh '''
-                    npm install netlify-cli@20.1.1 
+                    npm install netlify-cli node-jq
                     node_modules/.bin/netlify --version
-                    echo "Deploying to staging Site ID: $NETLIFY_SITE_ID"
+                    echo "Deploying to staging. Site ID: $NETLIFY_SITE_ID"
                     node_modules/.bin/netlify status
-                    node_modules/.bin/netlify deploy --dir=build   #deploy to temp env
+                    node_modules/.bin/netlify deploy --dir=build --json > deploy-output.json #temp json output
+                    node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json #using jq to read file
                 '''
             }
 
 
         }
 
-        stage('Approval'){
-            steps {
-                timeout(time: 1, unit: 'MINUTES') {
-                    input message: 'Ready For Deploying in Prod?', ok: 'Yes, I am Sure'
-                }
-            }
-        }
+        // stage('Approval'){
+        //     steps {
+        //         timeout(time: 1, unit: 'MINUTES') {
+        //             input message: 'Ready For Deploying in Prod?', ok: 'Yes, I am Sure'
+        //         }
+        //     }
+        // }
         stage('DeployProd') {
             agent{
                 docker{
