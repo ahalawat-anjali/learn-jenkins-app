@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    environment {
+        NETLIFY_SITE_ID = '1f29ad6b-bc60-4642-98dc-bbc5fef7c1da' //netlify auto check vaue for var name NETLIFY_SITE_ID
+    }
 
     stages {
         
@@ -84,6 +87,7 @@ pipeline {
                 sh '''
                     npm install netlify-cli@20.1.1 
                     node_modules/.bin/netlify --version
+                    echo "Deploying to production Site ID: $NETLIFY_SITE_ID"
                 '''
             }
 
