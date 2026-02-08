@@ -16,12 +16,12 @@ pipeline {
                     ls -la
                     node -v
                     npm -v
+                    ls -la /var/jenkins_home/workspace/learning-jenkins-app/node_modules
                     npm ci #to install server
                     npm run build
                     ls -la
                 '''
             }
-
         }
         
         stage ('Parallel Tests')
