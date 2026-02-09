@@ -3,6 +3,7 @@ pipeline {
     environment {
         NETLIFY_SITE_ID = '1f29ad6b-bc60-4642-98dc-bbc5fef7c1da' //netlify auto check vaue for var name NETLIFY_SITE_ID
         NETLIFY_AUTH_TOKEN = credentials('netlify-token') //credential manager access secert from jenkins credentials
+        REACT_APP_VERSION='1.1.1'
     }
 
     stages {
@@ -118,7 +119,6 @@ pipeline {
                     node_modules/.bin/netlify status
                     node_modules/.bin/netlify deploy --dir=build --json > deploy_output.json
                     CI_ENVIRONMENT_URL=$(node_modules/.bin/node-jq -r '.deploy_url' deploy_output.json)
-                    sleep(10)
                     npx playwright test  --reporter=html
                 '''
             }
