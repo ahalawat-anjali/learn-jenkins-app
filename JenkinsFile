@@ -100,28 +100,30 @@ pipeline {
 
 
         }
-        stage ('Staging E2E'){
-                    
-                    agent{
-                        docker{
-                            image 'mcr.microsoft.com/playwright:v1.39.0-jammy'
-                            reuseNode true
-                        }
-                    }
-                    environment{
-                        CI_ENVIRONMENT_URL = "${env.STAGE_URL}"
-                    }
-                    steps{
-                        sh '''
-                            npx playwright test --reporter=html
-                        '''
-                    }
-                    post{
-                        always{
-                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'PlayWright Staging E2E Report', reportTitles: '', useWrapperFileDirectly: true])
-                        }
-                    }
+        stage('Staging E2E') {
+            agent {
+                docker {
+                    image 'mcr.microsoft.com/playwright:v1.39.0-jammy'
+                    reuseNode true
                 }
+            }
+
+            environment {
+                CI_ENVIRONMENT_URL = "${env.STAGING_URL}"
+            }
+
+            steps {
+                sh '''
+                    npx playwright test  --reporter=html
+                '''
+            }
+
+            post {
+                always {
+                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Staging E2E', reportTitles: '', useWrapperFileDirectly: true])
+                }
+            }
+        }
         
         
     
@@ -133,28 +135,9 @@ pipeline {
         //         }
         //     }
         // }
-        stage('DeployProd') {
-            agent{
-                docker{
-                    image 'node:18-alpine'
-                    reuseNode true
-                }
-            }
-            steps {
-                echo 'Hello World'
-                sh '''
-                    npm install netlify-cli@20.1.1 
-                    node_modules/.bin/netlify --version
-                    echo "Deploying to production Site ID: $NETLIFY_SITE_ID"
-                    node_modules/.bin/netlify status
-                    node_modules/.bin/netlify deploy --dir=build --prod  #deploy to prod
-                '''
-            }
 
 
-        }
-
-        stage ('Prod E2E'){
+        stage ('DeployProd'){
                     
                     agent{
                         docker{
@@ -167,7 +150,12 @@ pipeline {
                     }
                     steps{
                         sh '''
-                        npx playwright test --reporter=html
+                            npm install netlify-cli@20.1.1 
+                            node_modules/.bin/netlify --version
+                            echo "Deploying to production Site ID: $NETLIFY_SITE_ID"
+                            node_modules/.bin/netlify status
+                            node_modules/.bin/netlify deploy --dir=build --prod  #deploy to prod
+                            npx playwright test --reporter=html
                         '''
                     }
                     post{
