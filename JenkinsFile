@@ -10,14 +10,23 @@ pipeline {
         stage('AwsCli'){
             agent {
                 docker{
-                    image 'amazon/aws-cli'
+                    image 'amazon/aws-cli:2.33.18'
                     args "--entrypoint=''"
                 }
             }
+            environment{
+                S3_BUCKET_NAME = 'learn-jenkins-2026-anjali'
+            }
             steps{
-                sh '''
-                    aws --version
-                '''
+                withCredentials([usernamePassword(credentialsId: 'aws-cli', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) 
+                {
+                    sh '''
+                        echo "Hello from S3 HTML" > index.html
+                        aws s3 cp index.html s3://${S3_BUCKET_NAME}/index.html
+                        aws s3 ls
+                    '''
+                }
+                
             }
         }
         stage('Build') {
