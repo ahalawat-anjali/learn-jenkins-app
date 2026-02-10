@@ -23,7 +23,7 @@
                         {
                             sh '''
                                 aws --version
-                                aws ecs register-task-definition --cli-input-json file://Learning/learn-jenkins-app/aws/task-definition.json
+                                aws ecs register-task-definition --cli-input-json file://learn-jenkins-app/aws/task-definition.json
             
                             '''
                         }
