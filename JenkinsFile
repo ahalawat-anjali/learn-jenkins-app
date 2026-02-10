@@ -7,7 +7,7 @@ pipeline {
     }
 
     stages {
-        stgae ('AwsCli'){
+        stage('AwsCli'){
             agent {
                 docker{
                     image 'amazon/aws-cli'
