@@ -24,6 +24,7 @@
                             sh '''
                                 aws --version
                                 aws ecs register-task-definition --cli-input-json file://aws/task-definition.json
+                                aws ecs update-service --cluster arn:aws:ecs:us-east-1:574726838121:cluster/jenkins-cluster-anjali --service learnJenkinsApp-Prod-service-app --task-definition learnJenkinsApp-Prod-TaskDef:2
             
                             '''
                         }
